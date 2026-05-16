@@ -2,10 +2,10 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
-import { fileURLToPAth } from "url";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
-comst __dirname = path.dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 //setting up express
 async function startServer(){ 
@@ -14,18 +14,18 @@ async function startServer(){
 
 //Initializing SQLite database
 const db = new Database("saferoute.db");
-db.exec(
+db.exec(`
   CREATE TABLE IF NOT EXISTS route_notes (
-    id INTERGER PRIMARY KEY AUTOINCREMENTS,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     latitude REAL NOT NULL,
     longitude REAL NOT NULL,
-    catagory TEXT NOT NULL,
+    category TEXT NOT NULL,
     description TEXT,
     time_of_day TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
-);
+`);
 
 app.use(express.json()); //expect data to be in json format and automatically parse it 
 
@@ -42,17 +42,17 @@ app.get("/api/notes", (req, res) => {
   });
 
   app.post("/api/notes", (req, res) => {
-    const { title, latitude, longitude, catagory, description,time_of_day } = req.body;
+    const { title, latitude, longitude, category, description,time_of_day } = req.body;
 
-    if(!title || !latitude || !longitude ||!catagory){
+    if(!title || !latitude || !longitude ||!category){
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     try{
-      const stmt = db.prepare(
-        'INSERT INTO route_notes (title, latitude, longitude, category, description, time_of_day)
-        VALUES (?, ?, ?, ?, ?, ?)'
-      );
+      const stmt = db.prepare(`
+        INSERT INTO route_notes (title, latitude, longitude, category, description, time_of_day)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
       const info = stmt.run(title, latitude, longitude, category, description || "", time_of_day || "");
       res.status(201).json({ id: info.lastInsertRowid });
     } catch (error) {
@@ -81,7 +81,7 @@ app.get("/api/notes", (req, res) => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
 
-
+}
 //if error during startup
   startServer().catch((err) => {
   console.error("Failed to start server:", err);
