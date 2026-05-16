@@ -40,5 +40,29 @@ app.get("/api/notes", (req, res) => {
       res.status(500).json({ error: "Failed to fetch notes" });
     }
   });
+
+  app.post("/api/notes", (req, res) => {
+    const { title, latitude, longitude, catagory, description,time_of_day } = req.body;
+
+    if(!title || !latitude || !longitude ||!catagory){
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    try{
+      const stmt = db.prepare(
+        'INSERT INTO route_notes (title, latitude, longitude, category, description, time_of_day)
+        VALUES (?, ?, ?, ?, ?, ?)'
+      );
+      const info = stmt.run(title, latitude, longitude, category, description || "", time_of_day || "");
+      res.status(201).json({ id: info.lastInsertRowid });
+    } catch (error) {
+      console.error("Database error:", error);
+      res.status(500).json({ error: "Failed to save note" });
+    }
+  });
+
+  
+      
+    
   
   
