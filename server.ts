@@ -29,4 +29,16 @@ db.exec(
 
 app.use(express.json()); //expect data to be in json format and automatically parse it 
 
-//API Routes 
+//API Routes
+app.get("/api/notes", (req, res) => {
+  try {
+      const notes = db.prepare("SELECT * FROM route_notes ORDER BY created_at DESC").all(); 
+      res.json(notes);
+      } 
+  catch (error) {
+      console.error("Database error:", error);
+      res.status(500).json({ error: "Failed to fetch notes" });
+    }
+  });
+  
+  
